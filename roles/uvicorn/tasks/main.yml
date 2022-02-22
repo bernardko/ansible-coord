@@ -1,0 +1,49 @@
+---
+# Initial setup tasks
+- import_tasks: base.yml
+
+# Cleanup tasks for removing configuration
+- import_tasks: cleanup.yml
+
+# Main workflow
+- name: Stop uvicorn process
+  when: uvicorn is defined
+  become: yes
+  supervisorctl: >
+    name={{ project_name }}-{{ item.name }}-uvicorn:
+    state=stopped
+  with_items: "{{ uvicorn }}"
+  tags:
+    - stop
+    - restart
+    - never
+
+- name: Install uvicorn supervisor configuration.
+  when: 
+    - uvicorn is defined
+    - item.remove|d(False) == False
+  notify: restart uvicorn
+  become: yes
+  template: >
+    src=supervisor.uvicorn.conf.j2
+    dest=/etc/supervisor/conf.d/{{ project_name }}-{{ item.name }}-uvicorn.conf
+    owner=root
+    group=root
+    mode=0644
+  with_items: "{{ uvicorn }}"
+  tags:
+    - deploy
+
+- name: Start uvicorn process
+  when: 
+    - uvicorn is defined
+    - item.remove|d(False) == False
+  become: yes
+  supervisorctl: >
+    name={{ project_name }}-{{ item.name }}-uvicorn:
+    state=started
+  with_items: "{{ uvicorn }}"
+  tags:
+    - start
+    - restart
+    - never

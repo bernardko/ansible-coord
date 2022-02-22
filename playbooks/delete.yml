@@ -1,0 +1,41 @@
+---
+- name: Delete all configuration and data
+  hosts: '{{ delete_target|d("deleteservers") }}'
+  vars:
+    coord_delete_all: yes
+  tasks:
+    - import_role: 
+        name: nginx
+        tasks_from: cleanup
+      tags:
+        - nginx
+    - import_role: 
+        name: celery
+        tasks_from: cleanup
+      tags:
+        - celery
+    - import_role: 
+        name: uvicorn
+        tasks_from: cleanup
+      tags:
+        - uvicorn
+    - import_role: 
+        name: rabbitmq
+        tasks_from: cleanup
+      tags:
+        - rabbitmq
+    - import_role: 
+        name: postgres
+        tasks_from: cleanup
+      tags:
+        - postgres
+    - import_role: 
+        name: django
+        tasks_from: cleanup
+      tags:
+        - django
+    - import_role: 
+        name: pyenv
+        tasks_from: cleanup
+      tags:
+        - pyenv

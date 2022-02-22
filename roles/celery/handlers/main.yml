@@ -1,0 +1,25 @@
+---
+- name: restart celery workers
+  when: 
+    - celery.workers is defined
+    - item.remove|d(False) == False
+  become: yes
+  supervisorctl: >
+    name={{ project_name }}-{{ item.node_name }}
+    state=restarted
+  with_items: "{{ celery.workers }}"
+
+- name: remove celery workers
+  when: 
+    - celery.workers is defined
+    - item.remove|d(False) == True
+  become: yes
+  supervisorctl: >
+    name={{ project_name }}-{{ item.node_name }}
+    state=absent
+  with_items: "{{ celery.workers }}"
+
+- name: update supervisor
+  when: celery.workers is defined
+  become: yes
+  command: supervisorctl update

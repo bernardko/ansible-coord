@@ -1,0 +1,24 @@
+---
+- name: Remove User
+  when: 
+    - rabbitmq is defined
+    - item.remove|d(False) == True or coord_delete_all|d(False) == True
+  become: yes
+  rabbitmq_user:
+    user: "{{ item.user }}"
+    password: "{{ item.password }}"
+    vhost: "{{ rabbitmq.vhost }}"
+    configure_priv: "{{ item.configure_priv }}"
+    read_priv: "{{ item.read_priv }}"
+    write_priv: "{{ item.write_priv }}"
+    state: absent
+  with_items: "{{ rabbitmq.users }}"
+
+- name: Remove vhost
+  when: 
+    - rabbitmq is defined
+    - coord_delete_all|d(False) == True
+  become: yes
+  rabbitmq_vhost:
+    name: "{{ rabbitmq.vhost }}"
+    state: absent

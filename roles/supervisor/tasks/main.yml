@@ -1,0 +1,16 @@
+---
+- name: Install system packages
+  become: yes
+  apt: >
+    pkg=supervisor
+    state=present
+    update-cache=yes
+  tags:
+    - packages
+
+- name: Enable on boot
+  become: yes
+  systemd: >
+    name=supervisor
+    enabled=yes
+    state=started

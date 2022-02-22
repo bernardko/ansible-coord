@@ -1,0 +1,7 @@
+---
+- name: Configure all cache servers
+  hosts: '{{cacheservers_target|default("cacheservers")}}'
+  roles:
+    - role: memcached
+      tags:
+        - memcached

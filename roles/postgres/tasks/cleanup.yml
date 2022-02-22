@@ -1,0 +1,20 @@
+---
+- name: Remove Database
+  when: 
+    - postgresql is defined
+    - coord_delete_all|d(False) == True
+  become: yes
+  become_user: postgres
+  postgresql_db: >
+    name={{ postgresql.name }}
+    state=absent
+
+- name: Remove Database User
+  when: 
+    - postgresql is defined
+    - coord_delete_all|d(False) == True
+  become: yes
+  become_user: postgres
+  postgresql_user: >
+    user={{ postgresql.user }}
+    state=absent

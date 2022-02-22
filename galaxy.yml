@@ -1,0 +1,28 @@
+namespace: bernardko
+name: coord
+version: 0.1.0
+readme: README.md
+authors:
+  - Bernard Ko <bernardko@gmail.com>
+description: Ansible collection for deploying Django projects
+license:
+  - MIT
+license_file: ''
+tags: 
+  - django
+  - celery
+  - nginx
+  - uvicorn
+  - postgresql
+  - pyenv
+  - rabbitmq
+  - supervisor
+  - pipenv
+  - memcached
+dependencies: {}
+repository: https://github.com/bernardko/ansible-coord
+documentation: ''
+homepage: ''
+issues: https://github.com/bernardko/ansible-coord/issues
+build_ignore: []
+

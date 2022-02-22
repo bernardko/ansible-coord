@@ -1,0 +1,24 @@
+---
+- name: Remove autocompletion from user profile
+  when:
+    - coord_delete_all|d(False) == True
+  lineinfile: 
+    dest: "{{ pyenv_user_profile }}"
+    regexp: "pyenv_autocompletion$"
+    line: "source {{ pyenv_root }}/pyenv_autocompletion"
+    state: absent
+    create: yes
+
+- name: Remove pyenv autocompletion file
+  when:
+    - coord_delete_all|d(False) == True
+  file:
+    path: "{{ pyenv_root }}/pyenv_autocompletion"
+    state: absent
+
+- name: Remove pyenv
+  when:
+    - coord_delete_all|d(False) == True
+  file:
+    path: "{{ pyenv_root }}"
+    state: absent

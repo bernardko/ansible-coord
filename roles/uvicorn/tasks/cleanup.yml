@@ -1,0 +1,16 @@
+---
+# Clean up tasks when the remove attribute is yes on
+# on uvicorn process item config.
+
+- name: Remove uvicorn supervisor configuration.
+  when: 
+    - uvicorn is defined
+    - item.remove|d(False) == True or coord_delete_all|d(False) == True
+  notify: 
+    - remove uvicorn
+    - update supervisor
+  become: yes
+  file: >
+    path=/etc/supervisor/conf.d/{{ project_name }}-{{ item.name }}-uvicorn.conf
+    state=absent
+  with_items: "{{ uvicorn }}"

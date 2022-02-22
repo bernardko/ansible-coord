@@ -1,0 +1,20 @@
+- name: Create .env file
+  when:
+    - dot_env_file.dest is defined 
+    - dot_env is defined
+  become: yes
+  become_user: "{{ project_user }}"
+  template:
+    src: env-file.template
+    dest: "{{ dot_env_file.dest }}"
+    owner: "{{ dot_env_file.owner | default(omit) }}"
+    group: "{{ dot_env_file.group | default(omit) }}"
+    mode: "{{ dot_env_file.mode | default(omit) }}"
+    backup: "{{ dot_env_file.backup | default(omit) }}"
+    force: "{{ dot_env_file.force | default(omit) }}"
+    validate: "{{ dot_env_file.validate | default(omit) }}"
+    selevel: "{{ dot_env_file.selevel | default(omit) }}"
+    serole: "{{ dot_env_file.serole | default(omit) }}"
+    setype: "{{ dot_env_file.setype | default(omit) }}"
+    seuser: "{{ dot_env_file.seuser | default(omit) }}"
+  tags: [env-file]

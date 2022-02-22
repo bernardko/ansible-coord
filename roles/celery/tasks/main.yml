@@ -1,0 +1,43 @@
+---
+- import_tasks: cleanup.yml
+
+- name: Stop celery workers
+  become: yes
+  supervisorctl: >
+    name={{project_name}}-{{ item.node_name }}
+    state=stopped
+  with_items: "{{ celery.workers }}"
+  tags:
+    - stop
+    - restart
+    - never
+    
+- name: Install Celery worker supervisor process
+  when:
+    - celery.workers is defined
+    - item.remove|d(False) == False
+  become: yes
+  template: >
+    src=supervisor.celeryworker.conf.j2
+    dest=/etc/supervisor/conf.d/{{ project_name }}-{{ item.node_name }}.conf
+    force=yes
+  vars:
+    worker: "{{ item }}"
+  with_items: "{{ celery.workers }}"
+  notify:
+    - restart celery workers
+  tags:
+    - deploy
+
+- name: Start celery workers
+  when: item.remove|d(False) == False
+  become: yes
+  supervisorctl: >
+    name={{project_name}}-{{ item.node_name }}
+    state=restarted
+  with_items: "{{ celery.workers }}"
+  tags:
+    - start
+    - restart
+    - never
+

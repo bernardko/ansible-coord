@@ -1,0 +1,25 @@
+---
+- name: Install pipenv
+  pip:
+    name: pipenv
+    virtualenv: '{{ virtualenv }}'
+    state: present
+
+- name: Check if a virtualenv is already created
+  command: '{{ virtualenv }}/bin/python -m pipenv --venv'
+  environment:
+    VIRTUAL_ENV: '{{ virtualenv }}'
+    PIPENV_PYTHON: '{{ virtualenv }}/bin/python }}'
+  args:
+    chdir: '{{ project_src }}'
+  register: pipenv_venv_check_cmd
+  changed_when: False
+
+- name: Run a pipenv sync
+  command: '{{ virtualenv }}/bin/python -m pipenv --bare sync {{ pipenv_extra_args | default() }}'
+  environment:
+    VIRTUAL_ENV: '{{ virtualenv }}'
+    PIPENV_PYTHON: '{{ virtualenv }}/bin/python }}'
+    LANG: '{{ lang }}'
+  args:
+    chdir: '{{ project_src }}'

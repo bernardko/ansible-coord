@@ -1,0 +1,13 @@
+[program:{{ project_name }}-{{ worker.node_name }}]
+command={{ virtualenv }}/bin/pipenv run {{ virtualenv }}/bin/celery --app {{ project_name }} worker -Q {{ worker.queues | default(celery) }} -n {{ worker.node_name }}@{{ inventory_hostname }} {% if worker.pool is defined %}--pool={{ worker.pool }}{% endif %} --concurrency={{ worker.concurrency| default(1) }} --loglevel={{ worker.loglevel | default("info") }}
+user={{ project_user }}
+numprocs=1
+directory={{ project_src }}
+stdout_logfile={{ project_logs }}/{{ project_name }}-{{ worker.node_name }}.log
+redirect_stderr=true
+stdout_logfile_maxbytes=2000000
+stdout_logfile_backups=0
+autostart=true
+autorestart=true
+startsecs=10
+stopwaitsecs = 30

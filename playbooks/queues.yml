@@ -1,0 +1,7 @@
+---
+- name: Configure all queue servers
+  hosts: '{{queueservers_target|default("queueservers")}}'
+  roles:
+    - role: rabbitmq
+      tags:
+        - rabbitmq

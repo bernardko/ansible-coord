@@ -1,0 +1,11 @@
+---
+- name: celery | Remove celery supervisor configuration.
+  notify: update supervisor
+  when: 
+    - celery.workers is defined
+    - item.remove|d(False) == True or coord_delete_all|d(False) == True
+  become: yes
+  file: >
+    path=/etc/supervisor/conf.d/{{ project_name }}-{{ item.node_name }}.conf
+    state=absent
+  with_items: "{{ celery.workers }}"

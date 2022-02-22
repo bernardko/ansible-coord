@@ -1,0 +1,11 @@
+---
+- name: Remove nginx configuration
+  when: 
+    - nginx.config is defined
+    - item.remove|d(False) == True or coord_delete_all|d(False) == True
+  become: yes
+  notify: restart nginx
+  file: >
+    path=/etc/nginx/sites-enabled/{{ project_name }}-{{ item.name }}.conf
+    state=absent
+  with_items: "{{ nginx.config }}"

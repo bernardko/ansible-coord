@@ -1,0 +1,9 @@
+---
+- name: Remove Project Root
+  when: coord_delete_all|d(False) == True
+  become: yes
+  file:
+    path: "{{ project_root }}"
+    state: absent
+    owner: "{{ project_user }}"
+    group: "{{ project_group }}"

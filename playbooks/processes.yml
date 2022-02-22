@@ -1,0 +1,13 @@
+---
+- name: Configure all application processes
+  hosts:
+    - '{{appservers_target|default("appservers")}}'
+    - '{{taskservers_target|default("taskservers")}}'
+  roles:
+    - role: uvicorn
+      tags:
+       - uvicorn
+    - role: celery
+      tags:
+        - celery
+

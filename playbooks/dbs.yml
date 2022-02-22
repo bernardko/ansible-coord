@@ -1,0 +1,7 @@
+---
+- name: Configure all database servers
+  hosts: '{{dbservers_target|default("dbservers")}}'
+  roles:
+    - role: postgres
+      tags:
+        - postgres

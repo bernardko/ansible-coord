@@ -1,0 +1,70 @@
+---
+- name: Install python build dependencies
+  apt:
+    pkg: '{{ pyenv_packages }}'
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600
+  become: yes
+  tags:
+    - setup
+
+- name: Checkout pyenv from git repository
+  git:
+    repo: "https://github.com/pyenv/pyenv.git"
+    dest: "{{ pyenv_root }}"
+    update: no
+  tags:
+    - setup
+
+- name: Checkout pyenv plugins
+  git:
+    repo: "https://github.com/pyenv/pyenv-{{ item }}.git"
+    dest: "{{ pyenv_root}}/plugins/pyenv-{{ item }}"
+    update: no
+  loop: "{{ pyenv_plugins }}"
+  tags:
+    - setup
+
+- name: Add pyenv autocompletion file
+  template:
+    src: "pyenv_autocompletion.j2"
+    dest: "{{ pyenv_root }}/pyenv_autocompletion"
+    owner: "{{ pyenv_user }}"
+    mode: "0644"
+  tags:
+    - setup
+
+- name: Add autocompletion to user profile
+  lineinfile: 
+    dest: "{{ pyenv_user_profile }}"
+    regexp: "pyenv_autocompletion$"
+    line: "source {{ pyenv_root }}/pyenv_autocompletion"
+    state: present
+    create: yes
+  tags:
+    - setup
+
+- name: Update pyenv python versions
+  command:
+    cmd: "{{ pyenv_root }}/bin/pyenv update"
+  tags:
+    - setup
+
+- name: Build python versions
+  command:
+    cmd: "{{ pyenv_root }}/bin/pyenv install {{ item }}"
+    creates: "{{ pyenv_root }}/versions/{{ item }}/bin/python"
+  loop: "{{ pyenv_python_versions }}"
+  tags:
+    - setup
+
+- name: Create virtualenvs
+  command:
+    cmd: "{{ pyenv_root }}/bin/pyenv virtualenv {{ item.python_version }} {{ item.name }}"
+    creates: "{{ pyenv_root }}/versions/{{ item.name }}/bin/python"
+  loop: "{{ pyenv_virtualenvs }}"
+  tags:
+    - setup
+
+

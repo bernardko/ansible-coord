@@ -1,0 +1,41 @@
+---
+pyenv_user: "{{ ansible_env.USER }}"
+pyenv_user_profile: "{{ ansible_env.HOME }}/.bashrc"
+pyenv_root: "{{ ansible_env.HOME }}/.pyenv"
+
+pyenv_packages:
+  - curl
+  - git
+  - make 
+  - build-essential 
+  - libssl-dev 
+  - zlib1g-dev 
+  - libbz2-dev 
+  - libreadline-dev 
+  - libsqlite3-dev 
+  - wget 
+  - curl 
+  - llvm
+  - libncursesw5-dev 
+  - xz-utils 
+  - tk-dev 
+  - libxml2-dev 
+  - libxmlsec1-dev 
+  - libffi-dev 
+  - liblzma-dev
+
+pyenv_plugins:
+  - doctor
+  - installer
+  - update
+  - virtualenv
+  - which-ext
+
+pyenv_autocompletion:
+  - 'export PATH="$HOME/.pyenv/bin:$PATH"'
+  - 'eval "$(pyenv init --path)"'
+  - 'eval "$(pyenv virtualenv-init -)"'
+
+pyenv_python_versions: []
+
+pyenv_virtualenvs: []

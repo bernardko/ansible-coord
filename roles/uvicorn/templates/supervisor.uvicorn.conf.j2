@@ -1,0 +1,14 @@
+[fcgi-program:{{ project_name }}-{{ item.name }}-uvicorn]
+directory={{ project_src }}
+socket=tcp://{{ item.host }}:{{ item.port }}
+command={{ virtualenv }}/bin/pipenv run {{ virtualenv }}/bin/uvicorn --fd 0 {{ item.asgi }}
+numprocs={{ item.processes }}
+process_name=%(process_num)d
+user={{ project_user }}
+autostart=true
+autorestart=true
+stdout_logfile={{ project_logs }}/{{ project_name }}-{{ item.name }}-uvicorn.log
+redirect_stderr=true
+stdout_logfile_maxbytes=2000000
+stdout_logfile_backups=0
+stopsignal=QUIT

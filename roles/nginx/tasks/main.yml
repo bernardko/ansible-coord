@@ -1,0 +1,21 @@
+---    
+# Install system packages and create logging paths
+- import_tasks: base.yml
+
+# Clean up configuration with remove attribute
+- import_tasks: cleanup.yml
+
+# Main workflow
+- name: Install nginx configuration file
+  when: 
+    - nginx.config is defined
+    - item.remove|d(False) == False
+  become: yes
+  notify: restart nginx
+  template: >
+    src={{ item.config_template }}
+    dest=/etc/nginx/sites-enabled/{{ project_name }}-{{ item.name }}.conf
+  with_items: "{{ nginx.config }}"
+  tags:
+    - deploy
+

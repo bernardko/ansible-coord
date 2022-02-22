@@ -1,0 +1,10 @@
+---
+- name: Install platform dependancies
+  hosts: '{{appservers_target|default("appservers")}}'
+  roles:
+    - role: pyenv
+      tags:
+        - pyenv
+    - role: supervisor
+      tags:
+        - supervisor

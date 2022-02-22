@@ -1,0 +1,6 @@
+---
+- name: restart memcached
+  become: yes
+  systemd: >
+    name=memcached
+    state=restarted

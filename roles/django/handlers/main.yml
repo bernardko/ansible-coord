@@ -1,0 +1,30 @@
+---
+# - name: restart uvicorn
+#   when: uvicorn is defined
+#   become: yes 
+#   supervisorctl: >
+#     name={{ project_name }}-{{ item.name }}-uvicorn:
+#     state=restarted
+#   with_items: "{{ uvicorn }}"
+#   ignore_errors: yes
+
+# - name: restart celery workers
+#   when: celery.workers is defined
+#   become: yes
+#   supervisorctl: >
+#     name={{project_name}}-{{ item.node_name }}
+#     state=restarted
+#   with_items: "{{ celery.workers }}"
+#   ignore_errors: yes
+
+- name: restart app
+  when:
+    - django_commands.final_commands is defined
+  become_user: "{{ project_user }}"
+  django_manage: >
+    command={{ item }}
+    app_path={{ project_src }}
+    settings={{ django_settings }}
+    virtualenv={{ virtualenv }}
+  with_items: "{{ django_commands.final_commands }}"
+  environment: "{{ dot_env }}"

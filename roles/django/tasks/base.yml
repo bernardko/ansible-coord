@@ -1,0 +1,54 @@
+---
+- name: Django | Create application user and home.
+  become: yes
+  user: >
+    name={{ project_user }}
+    groups=www-data
+    append=yes
+    state=present
+  tags:
+    - deploy
+
+
+- name: Django | Create Project Root
+  become: yes
+  file:
+    path: "{{ project_root }}"
+    state: directory
+    owner: "{{ project_user }}"
+    group: "{{ project_group }}"
+  tags:
+    - deploy
+
+
+- name: Django | Create Sub Directories
+  become: yes
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ project_user }}"
+    group: "{{ project_group }}"
+  with_items: "{{ create_paths }}"
+  tags:
+    - deploy
+
+
+- name: Django | Change permissions
+  become: true
+  file: >
+    path={{ project_root }}
+    owner={{ project_user }}
+    group=www-data
+    state=directory
+  tags:
+    - deploy
+
+
+- name: Django | Install required system packages
+  become: yes
+  apt: >
+    pkg={{ sys_packages + ['python3-apt','build-essential','python-dev','libpq-dev'] }}
+    state=present
+    update-cache=yes
+  tags:
+    - deploy

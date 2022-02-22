@@ -1,0 +1,7 @@
+---
+- name: Configure all Load Balancers
+  hosts: '{{loadbalancers_target|default("loadbalancers")}}'
+  roles:
+    - role: nginx
+      tags:
+        - nginx

@@ -1,0 +1,15 @@
+---
+- name: Application Configuration
+  hosts: 
+    - '{{appservers_target|default("appservers")}}'
+    - '{{taskservers_target|default("taskservers")}}'
+  roles:
+    - role: django
+      tags:
+        - django
+    - role: uvicorn
+      tags:
+        - uvicorn
+    - role: celery
+      tags:
+        - celery

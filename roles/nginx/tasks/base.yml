@@ -1,0 +1,59 @@
+---
+- name: Install required system packages.
+  become: yes
+  apt: >
+    pkg=nginx
+    state=present
+    update-cache=yes
+  tags:
+    - setup
+
+- name: Create log directory
+  become: yes
+  file: >
+    dest={{ project_logs }}
+    owner={{ project_user }}
+    owner={{ project_group }}
+    state=directory
+  tags:
+    - setup
+
+- name: Nginx | remove default nginx site
+  notify: restart nginx
+  become: yes
+  file: >
+    path=/etc/nginx/sites-enabled/default
+    state=absent
+  tags:
+    - setup
+
+# Harden nginx SSL security if enabled
+- name: Check for existence of dhparam.pem file
+  become: yes
+  when:   
+    - nginx.strong_ssl|d(False) == True
+  stat:
+    path: "/etc/ssl/certs/dhparam.pem"
+  register: dhparam_data
+
+# This is really slow
+- name: Create dhparam.pem file (This will take a while...)
+  become: yes
+  when:    
+    - nginx.strong_ssl|d(False) == True
+    - not dhparam_data.stat.exists
+  become: yes
+  shell: openssl dhparam -out /etc/ssl/certs/dhparam.pem 4096
+  tags:
+    - setup
+
+- name: Install ssl-params.conf file
+  become: yes
+  when:    
+    - nginx.strong_ssl|d(False) == True
+  template: >
+    src=ssl-params.conf.j2
+    dest=/etc/nginx/snippets/ssl-params.conf
+  tags:
+    - setup
+

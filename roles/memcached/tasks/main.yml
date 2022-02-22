@@ -1,0 +1,30 @@
+---
+- name: Install system packages
+  become: yes
+  apt: >
+    pkg=memcached
+    state=present
+    update-cache=yes
+  tags:
+    - setup
+
+- name: Enable on boot
+  become: yes
+  systemd: >
+    name=memcached
+    enabled=yes
+    state=started
+  tags:
+    - setup
+
+- name: Install custom memcached config
+  become: yes
+  template: >
+    src=memcached.conf.j2
+    dest=/etc/memcached.conf
+    backup=yes
+    force=yes
+  notify:
+    - restart memcached
+  tags:
+    - setup
