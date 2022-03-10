@@ -5,7 +5,11 @@
     virtualenv: '{{ virtualenv }}'
     state: present
 
-- name: Check if a virtualenv is already created
+- name: Pipenv | Set Package Manager Command Fact
+  set_fact:
+    package_manager_command: "{{ bin_path }}"
+
+- name: Pipenv | Check if a virtualenv is already created
   command: '{{ virtualenv }}/bin/python -m pipenv --venv'
   environment:
     VIRTUAL_ENV: '{{ virtualenv }}'
@@ -15,7 +19,7 @@
   register: pipenv_venv_check_cmd
   changed_when: False
 
-- name: Run a pipenv sync
+- name: Pipenv | Run a pipenv sync
   command: '{{ virtualenv }}/bin/python -m pipenv --bare sync {{ pipenv_extra_args | default() }}'
   environment:
     VIRTUAL_ENV: '{{ virtualenv }}'

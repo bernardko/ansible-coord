@@ -6,7 +6,7 @@
 - import_tasks: cleanup.yml
 
 # Main workflow
-- name: Stop uvicorn process
+- name: Uvicorn | Stop uvicorn process
   when: uvicorn is defined
   become: yes
   supervisorctl: >
@@ -18,11 +18,10 @@
     - restart
     - never
 
-- name: Install uvicorn supervisor configuration.
+- name: Uvicorn | Install uvicorn supervisor configuration.
   when: 
     - uvicorn is defined
     - item.remove|d(False) == False
-  notify: restart uvicorn
   become: yes
   template: >
     src=supervisor.uvicorn.conf.j2
@@ -34,7 +33,12 @@
   tags:
     - deploy
 
-- name: Start uvicorn process
+- name: Uvicorn | Update supervisor
+  when: uvicorn is defined
+  become: yes
+  command: supervisorctl update
+
+- name: Uvicorn | Start uvicorn process
   when: 
     - uvicorn is defined
     - item.remove|d(False) == False

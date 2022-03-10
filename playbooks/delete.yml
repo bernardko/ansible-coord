@@ -30,10 +30,10 @@
       tags:
         - postgres
     - import_role: 
-        name: django
+        name: project
         tasks_from: cleanup
       tags:
-        - django
+        - project
     - import_role: 
         name: pyenv
         tasks_from: cleanup

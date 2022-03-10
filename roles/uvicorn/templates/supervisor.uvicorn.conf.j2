@@ -1,7 +1,7 @@
 [fcgi-program:{{ project_name }}-{{ item.name }}-uvicorn]
 directory={{ project_src }}
 socket=tcp://{{ item.host }}:{{ item.port }}
-command={{ virtualenv }}/bin/pipenv run {{ virtualenv }}/bin/uvicorn --fd 0 {{ item.asgi }}
+command={{ package_manager_command }} run {{ virtualenv }}/bin/uvicorn --fd 0 {{ item.asgi }}
 numprocs={{ item.processes }}
 process_name=%(process_num)d
 user={{ project_user }}

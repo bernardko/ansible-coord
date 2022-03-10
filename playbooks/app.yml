@@ -4,12 +4,8 @@
     - '{{appservers_target|default("appservers")}}'
     - '{{taskservers_target|default("taskservers")}}'
   roles:
-    - role: django
+    - role: application
       tags:
+        - application
         - django
-    - role: uvicorn
-      tags:
-        - uvicorn
-    - role: celery
-      tags:
-        - celery
+        - fastapi

@@ -1,0 +1,35 @@
+---
+- name: Poetry | Install Packages
+  become: yes
+  apt:
+    pkg: "{{ ['curl'] }}"
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600
+  tags: 
+    - setup
+
+- name: Poetry | Set Package Manager Command Fact
+  set_fact:
+    package_manager_command: "{{ bin_path }}"
+
+- name: Poetry | Check if installed
+  stat:
+    path: "{{ ansible_env.HOME }}/.local/share/pypoetry/VERSION"
+  register: poetry_installed
+  tags:
+    -setup
+
+- name: Poetry | Install poetry
+  when: not poetry_installed.stat.exists
+  shell: 'curl -sSL https://install.python-poetry.org | {{ virtualenv }}/bin/python - --version {{ poetry_version }}'
+  tags:
+    -setup
+
+- name: Poetry | Run poetry install
+  shell: '. {{ virtualenv }}/bin/activate && {{ ansible_env.HOME }}/.local/bin/poetry install'
+  args:
+    chdir: '{{ project_src }}'
+  tags:
+    -setup
+

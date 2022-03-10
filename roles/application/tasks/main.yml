@@ -1,0 +1,60 @@
+---
+- name: Application | Clone or pull git repository
+  become: yes
+  become_user: "{{ project_user }}"
+  git: >
+    repo={{ repo.url }}
+    dest={{ project_src }}
+    version={{ repo.version }}
+    accept_newhostkey=yes
+    force=yes
+    update=yes
+  tags:
+    - deploy
+  notify:
+    - restart celery workers
+    - restart uvicorn
+    - restart app
+
+- name: Application | Create the .env file
+  include_role:
+    name: dot_env
+  when:
+    - dot_env_file.dest is defined 
+    - dot_env is defined
+  tags:
+    - deploy
+
+- name: Application | Sync python package requirements using pipenv
+  when: package_manager == 'pipenv'
+  include_role:
+    name: pipenv
+  tags:
+    - deploy
+
+- name: Application | Sync python package requirements using poetry
+  when: package_manager == 'poetry'
+  include_role:
+    name: poetry
+  tags:
+    - deploy
+
+- name: Application | Setup Django Application
+  include_role:
+    name: django
+  when: framework == "django"
+
+- name: Application | Setup FastAPI Application
+  include_role:
+    name: fastapi
+  when: framework == "fastapi"
+
+- name: Application | Run Uvicorn Tasks
+  include_role:
+    name: uvicorn
+  when: uvicorn is defined
+
+- name: Application | Run Celery Tasks
+  include_role:
+    name: celery
+  when: celery is defined

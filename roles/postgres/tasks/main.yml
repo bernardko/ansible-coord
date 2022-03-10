@@ -1,5 +1,6 @@
 ---
 - name: Install Packages
+  when: postgresql is defined
   become: yes
   apt:
     pkg: "{{ ['postgresql','postgresql-contrib','python3-psycopg2', 'libpq-dev', 'acl'] }}"

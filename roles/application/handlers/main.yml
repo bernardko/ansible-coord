@@ -1,0 +1,38 @@
+---
+- name: restart uvicorn
+  when: 
+    - uvicorn is defined
+    - item.remove|d(False) == False
+  become: yes
+  supervisorctl: >
+    name={{ project_name }}-{{ item.name }}-uvicorn:
+    state=restarted
+  with_items: "{{ uvicorn }}"
+
+- name: restart celery workers
+  when: 
+    - celery.workers is defined
+    - item.remove|d(False) == False
+  become: yes
+  supervisorctl: >
+    name={{ project_name }}-{{ item.node_name }}
+    state=restarted
+  with_items: "{{ celery.workers }}"
+
+- name: Run custom django startup management commands 
+  when:
+    - framework == 'django'
+    - django_commands.start_commands is defined
+  become_user: "{{ project_user }}"
+  django_manage: >
+    command={{ item }}
+    app_path={{ project_src }}
+    settings={{ django_settings }}
+    virtualenv={{ virtualenv }}
+  with_items: "{{ django_commands.start_commands }}"
+  environment: "{{ dot_env }}"
+  listen: "restart app"
+  tags:
+    - deploy
+    - start
+    - restart

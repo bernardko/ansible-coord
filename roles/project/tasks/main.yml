@@ -1,5 +1,14 @@
 ---
-- name: Django | Create application user and home.
+- name: Project | Install required system packages
+  become: yes
+  apt: >
+    pkg={{ sys_packages + ['python3-apt','build-essential','python-dev'] }}
+    state=present
+    update-cache=yes
+  tags:
+    - deploy
+
+- name: Project | Create application user and home.
   become: yes
   user: >
     name={{ project_user }}
@@ -9,8 +18,7 @@
   tags:
     - deploy
 
-
-- name: Django | Create Project Root
+- name: Project | Create Project Root
   become: yes
   file:
     path: "{{ project_root }}"
@@ -21,7 +29,7 @@
     - deploy
 
 
-- name: Django | Create Sub Directories
+- name: Project | Create Sub Directories
   become: yes
   file:
     path: "{{ item }}"
@@ -33,22 +41,12 @@
     - deploy
 
 
-- name: Django | Change permissions
+- name: Project | Change permissions
   become: true
   file: >
     path={{ project_root }}
     owner={{ project_user }}
     group=www-data
     state=directory
-  tags:
-    - deploy
-
-
-- name: Django | Install required system packages
-  become: yes
-  apt: >
-    pkg={{ sys_packages + ['python3-apt','build-essential','python-dev','libpq-dev'] }}
-    state=present
-    update-cache=yes
   tags:
     - deploy

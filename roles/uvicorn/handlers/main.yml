@@ -1,14 +1,4 @@
 ---
-- name: restart uvicorn
-  when: 
-    - uvicorn is defined
-    - item.remove|d(False) == False
-  become: yes
-  supervisorctl: >
-    name={{ project_name }}-{{ item.name }}-uvicorn:
-    state=restarted
-  with_items: "{{ uvicorn }}"
-
 - name: remove uvicorn
   when: 
     - uvicorn is defined
@@ -18,8 +8,3 @@
     name={{ project_name }}-{{ item.name }}-uvicorn:
     state=absent
   with_items: "{{ uvicorn }}"
-
-- name: update supervisor
-  when: uvicorn is defined
-  become: yes
-  command: supervisorctl update
