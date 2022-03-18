@@ -42,7 +42,6 @@
   when:    
     - nginx.strong_ssl|d(False) == True
     - not dhparam_data.stat.exists
-  become: yes
   shell: openssl dhparam -out /etc/ssl/certs/dhparam.pem 4096
   tags:
     - setup
