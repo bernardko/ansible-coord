@@ -1,0 +1,9 @@
+---
+- name: Project Folder Setup
+  hosts: 
+    - '{{appservers_target|default("appservers")}}'
+    - '{{taskservers_target|default("taskservers")}}'
+  roles:
+    - role: project
+      tags:
+        - project

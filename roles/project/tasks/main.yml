@@ -30,6 +30,7 @@
 
 
 - name: Project | Create Sub Directories
+  when: create_paths is defined
   become: yes
   file:
     path: "{{ item }}"
