@@ -18,18 +18,35 @@
     path: "{{ ansible_env.HOME }}/.local/share/pypoetry/VERSION"
   register: poetry_installed
   tags:
-    -setup
+    - setup
 
 - name: Poetry | Install poetry
   when: not poetry_installed.stat.exists
   shell: 'curl -sSL https://install.python-poetry.org | {{ virtualenv }}/bin/python - --version {{ poetry_version }}'
   tags:
-    -setup
+    - setup
+
+- name: Poetry | Fix potential permission issues on virtualenv path
+  become: yes
+  file:
+    path: '{{ ansible_env.HOME }}/.local/share/virtualenv'
+    state: directory
+    recurse: yes
+    owner: "{{ ansible_env.USER }}"
+    group: "{{ ansible_env.USER }}"
+  tags:
+    - setup
+
+- name: Poetry | Install poetry-dotenv-plugin
+  when: not poetry_installed.stat.exists
+  shell: '. {{ virtualenv }}/bin/activate && {{ ansible_env.HOME }}/.local/bin/poetry plugin add poetry-dotenv-plugin'
+  tags:
+    - setup
 
 - name: Poetry | Run poetry install
   shell: '. {{ virtualenv }}/bin/activate && {{ ansible_env.HOME }}/.local/bin/poetry install'
   args:
     chdir: '{{ project_src }}'
   tags:
-    -setup
+    - setup
 
