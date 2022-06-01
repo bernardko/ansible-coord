@@ -53,6 +53,7 @@
   template: >
     src=ssl-params.conf.j2
     dest=/etc/nginx/snippets/ssl-params.conf
+    force=yes
   tags:
     - setup
 

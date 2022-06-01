@@ -1,0 +1,23 @@
+---
+- name: uWSGI | (pip) Install required system packages.
+  when: uwsgi is defined
+  pip: >
+    name=uwsgi
+    virtualenv={{ virtualenv }}
+  tags:
+    - deploy
+
+- name: uWSGI | Install uwsgi_params file.
+  when: 
+    - uwsgi is defined
+    - item.remove|d(False) == False
+  become: yes
+  template: >
+    src=supervisor.uwsgi.conf.j2
+    dest=/etc/nginx/snippets/uwsgi_params
+    owner=root
+    group=root
+    mode=0644
+    force=yes
+  tags:
+    - deploy

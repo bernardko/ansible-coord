@@ -1,15 +1,15 @@
 ---
-- name: remove uvicorn
+- name: remove uwsgi
   when: 
-    - uvicorn is defined
+    - uwsgi is defined
     - item.remove|d(False) == True
   become: yes
   supervisorctl: >
-    name={{ project_name }}-{{ item.name }}-uvicorn:
+    name={{ project_name }}-{{ item.name }}-uwsgi:
     state=absent
-  with_items: "{{ uvicorn }}"
+  with_items: "{{ uwsgi }}"
 
 - name: update supervisor
-  when: uvicorn is defined
+  when: uwsgi is defined
   become: yes
   command: supervisorctl update

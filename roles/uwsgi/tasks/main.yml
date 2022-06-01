@@ -1,0 +1,53 @@
+---
+- import_tasks: base.yml
+  when: is_setup|d(False) == True
+
+# Main workflow
+- name: uWSGI | Stop uwsgi process
+  when: uvicorn is defined
+  become: yes
+  supervisorctl: >
+    name={{ project_name }}-{{ item.name }}-uwsgi:
+    state=stopped
+  with_items: "{{ uwsgi }}"
+  tags:
+    - stop
+    - restart
+    - never
+
+- name: uWSGI | Install uwsgi supervisor configuration.
+  when: 
+    - uwsgi is defined
+    - item.remove|d(False) == False
+  become: yes
+  template: >
+    src=supervisor.uwsgi.conf.j2
+    dest=/etc/supervisor/conf.d/{{ project_name }}-uwsgi.conf
+    owner=root
+    group=root
+    mode=0644
+    force=yes
+  with_items: "{{ uwsgi }}"
+  tags:
+    - deploy
+
+- name: uWSGI | Update supervisor
+  when: uwsgi is defined
+  become: yes
+  command: supervisorctl update
+
+- name: uWSGI | Start uwsgi process
+  when: 
+    - uwsgi is defined
+    - item.remove|d(False) == False
+  become: yes
+  supervisorctl: >
+    name={{ project_name }}-{{ item.name }}-uwsgi:
+    state=started
+  with_items: "{{ uwsgi }}"
+  tags:
+    - start
+    - restart
+    - never
+
+

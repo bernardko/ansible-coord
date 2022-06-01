@@ -1,6 +1,7 @@
 ---
 # Initial setup tasks
 - import_tasks: base.yml
+  when: is_setup|d(False) == True
 
 # Cleanup tasks for removing configuration
 - import_tasks: cleanup.yml
@@ -29,6 +30,7 @@
     owner=root
     group=root
     mode=0644
+    force=yes
   with_items: "{{ uvicorn }}"
   tags:
     - deploy
@@ -51,3 +53,11 @@
     - start
     - restart
     - never
+
+- name: Uvicorn | Disable env switch
+  when: 
+    - uvicorn is defined
+    - item.remove|d(False) == False
+    - package_manager_command|d("") != "" 
+  set_fact:
+    uvicorn_env_switch: ""

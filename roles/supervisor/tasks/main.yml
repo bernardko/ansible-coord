@@ -1,16 +1,19 @@
 ---
-- name: Install system packages
-  become: yes
-  apt: >
-    pkg=supervisor
-    state=present
-    update-cache=yes
-  tags:
-    - packages
+- import_tasks: base.yml
+  when: is_setup|d(False) == True
 
-- name: Enable on boot
+- name: Supervisor | Install supervisor configuration.
+  when: 
+    - supervisor is defined
+    - item.remove|d(False) == False
   become: yes
-  systemd: >
-    name=supervisor
-    enabled=yes
-    state=started
+  template: >
+    src=supervisor.conf.j2
+    dest=/etc/supervisor/conf.d/{{ project_name }}-{{ item.name }}.conf
+    owner=root
+    group=root
+    mode=0644
+    force=yes
+  with_items: "{{ supervisor }}"
+  tags:
+    - deploy

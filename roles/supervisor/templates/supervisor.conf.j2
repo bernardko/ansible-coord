@@ -1,0 +1,14 @@
+[program:{{ project_name }}-{{ item.name }}]
+command={{ item.command }}
+user={{ project_user }}
+numprocs={{ item.numprocs|d(1) }}
+directory={{ app_working_dir }}
+{% if item.env_vars|d({}) %}environment={% for key, value in item.env_vars.items() %}{{ key }}="{{ value }}"{% if not loop.last %},{% endif %}{% endfor %}{% endif %}
+
+stdout_logfile={{ project_logs }}/{{ project_name }}-{{ item.name }}.log
+redirect_stderr=true
+stdout_logfile_maxbytes=2000000
+stdout_logfile_backups=0
+autostart={{ item.autostart }}
+autorestart={{ item.autorestart }}
+

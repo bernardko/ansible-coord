@@ -29,7 +29,7 @@
     group: "{{ dot_env_file.group | default(omit) }}"
     mode: "{{ dot_env_file.mode | default(omit) }}"
     backup: "{{ dot_env_file.backup | default(omit) }}"
-    force: "{{ dot_env_file.force | default(omit) }}"
+    force: "{{ dot_env_file.force | default(True) }}"
     validate: "{{ dot_env_file.validate | default(omit) }}"
     selevel: "{{ dot_env_file.selevel | default(omit) }}"
     serole: "{{ dot_env_file.serole | default(omit) }}"
@@ -56,6 +56,13 @@
   tags:
     - deploy
 
+- name: Application | Install python package requirements using pip
+  when: package_manager == 'pip'
+  include_role:
+    name: pip
+  tags:
+    - deploy
+
 - name: Application | Setup Django Application
   include_role:
     name: django
@@ -66,10 +73,20 @@
     name: fastapi
   when: framework == "fastapi"
 
+- name: Application | Run Supervisor Tasks
+  include_role:
+    name: supervisor
+  when: supervisor is defined
+
 - name: Application | Run Uvicorn Tasks
   include_role:
     name: uvicorn
   when: uvicorn is defined
+
+- name: Application | Run uWSGI Tasks
+  include_role:
+    name: uwsgi
+  when: uwsgi is defined
 
 - name: Application | Run Celery Tasks
   include_role:

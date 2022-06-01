@@ -1,0 +1,28 @@
+[program:{{ project_name }}-{{ item.name }}-uwsgi]
+command={{ virtualenv }}/bin/uwsgi
+  --wsgi-file {{ item.wsgi }}
+  {% for key, value in dot_env.items() %}
+  --env {{key}}={{value}}
+  {% endfor %}
+  --socket {{ item.host }}:{{ item.port }}
+  --virtualenv {{ virtualenv }}
+  --pythonpath {{ app_working_dir }}
+  --processes {{ item.processes }}
+  --reload-on-as 128
+  --reload-on-rss 96
+  --master
+  --max-requests 5000
+  --vacuum
+  --ignore-sigpipe
+  --die-on-term
+  --worker-reload-mercy 10
+
+directory={{ app_working_dir }}
+user={{ project_user }}
+autostart=true
+autorestart=true
+stdout_logfile={{ project_logs }}/{{ project_name }}-{{ item.name }}-uwsgi.log
+redirect_stderr=true
+stdout_logfile_maxbytes=2000000
+stdout_logfile_backups=0
+stopsignal=QUIT

@@ -1,0 +1,3 @@
+---
+package_manager_command: ""
+uvicorn_env_switch: "--env-file .env"

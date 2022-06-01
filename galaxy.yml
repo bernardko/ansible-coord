@@ -1,6 +1,6 @@
 namespace: bernardko
 name: coord
-version: 0.1.0
+version: 0.2.0
 readme: README.md
 authors:
   - Bernard Ko <bernardko@gmail.com>
@@ -19,6 +19,8 @@ tags:
   - supervisor
   - pipenv
   - memcached
+  - uwsgi
+  - pip
 dependencies: {}
 repository: https://github.com/bernardko/ansible-coord
 documentation: ''

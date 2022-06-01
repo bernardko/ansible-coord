@@ -1,15 +1,15 @@
 ---
-- name: remove uvicorn
+- name: remove supervisor
   when: 
-    - uvicorn is defined
+    - supervisor is defined
     - item.remove|d(False) == True
   become: yes
   supervisorctl: >
-    name={{ project_name }}-{{ item.name }}-uvicorn:
+    name={{ project_name }}-{{ item.name }}:
     state=absent
-  with_items: "{{ uvicorn }}"
+  with_items: "{{ supervisor }}"
 
 - name: update supervisor
-  when: uvicorn is defined
+  when: supervisor is defined
   become: yes
   command: supervisorctl update

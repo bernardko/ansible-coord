@@ -1,0 +1,23 @@
+---
+# Clean up tasks when the remove attribute is yes on
+# on uvicorn process item config.
+
+- name: uWSGI | (pip) Install required system packages.
+  when: uwsgi is not defined
+  pip: >
+    name=uwsgi
+    virtualenv={{ virtualenv }}
+    state=absent
+
+- name: Remove uwsgi supervisor configuration.
+  when: 
+    - uwsgi is defined
+    - item.remove|d(False) == True or coord_delete_all|d(False) == True
+  notify: 
+    - remove uwsgi
+    - update supervisor
+  become: yes
+  file: >
+    path=/etc/supervisor/conf.d/{{ project_name }}-{{ item.name }}-uwsgi.conf
+    state=absent
+  with_items: "{{ uwsgi }}"

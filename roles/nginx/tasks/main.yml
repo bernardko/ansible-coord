@@ -15,6 +15,7 @@
   template: >
     src={{ item.config_template }}
     dest=/etc/nginx/sites-enabled/{{ project_name }}-{{ item.name }}.conf
+    force=yes
   with_items: "{{ nginx.config }}"
   tags:
     - deploy

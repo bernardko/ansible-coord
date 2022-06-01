@@ -1,8 +1,22 @@
 ---
 - import_playbook: queues.yml
+  vars:
+    is_setup: True
 - import_playbook: caches.yml
+  vars:
+    is_setup: True
 - import_playbook: dbs.yml
+  vars:
+    is_setup: True
 - import_playbook: platform.yml
+  vars:
+    is_setup: True
 - import_playbook: project.yml
+  vars:
+    is_setup: True
 - import_playbook: app.yml
+  vars:
+    is_setup: True
 - import_playbook: loadbalancers.yml
+  vars:
+    is_setup: True

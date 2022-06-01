@@ -1,0 +1,3 @@
+---
+sys_packages: []
+app_working_dir: "{{ project_src }}"

@@ -5,7 +5,7 @@
   become_user:  "{{ project_user }}"
   django_manage: >
     command=migrate
-    app_path={{ project_src }}
+    app_path={{ app_working_dir }}
     settings={{ django_settings }}
     virtualenv={{ virtualenv }}
   environment: "{{ dot_env }}"
@@ -18,7 +18,7 @@
   django_manage: >
     command=loaddata
     fixtures={{ item }}
-    app_path={{ project_src }}
+    app_path={{ app_working_dir }}
     settings={{ django_settings }}
     virtualenv={{ virtualenv }}
   with_items: "{{ django_commands.fixtures }}"
@@ -31,7 +31,7 @@
   become_user: "{{ project_user }}"
   django_manage: >
     command=collectstatic
-    app_path={{ project_src }}
+    app_path={{ app_working_dir }}
     settings={{ django_settings }}
     virtualenv={{ virtualenv }}
   environment: "{{ dot_env }}"
