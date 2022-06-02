@@ -16,6 +16,12 @@
   tags:
     - deploy
 
+- name: Application | Install python-dotenv
+  pip:
+    name: python-dotenv
+    virtualenv: '{{ virtualenv }}'
+    state: present
+
 - name: Application | Create .env file
   when:
     - dot_env_file.dest is defined 
@@ -66,12 +72,12 @@
 - name: Application | Setup Django Application
   include_role:
     name: django
-  when: framework == "django"
+  when: django is defined
 
 - name: Application | Setup FastAPI Application
   include_role:
     name: fastapi
-  when: framework == "fastapi"
+  when: fastapi is defined
 
 - name: Application | Run Supervisor Tasks
   include_role:

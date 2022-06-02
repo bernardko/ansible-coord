@@ -12,8 +12,9 @@
   when: rabbitmq is defined
   become: yes
   rabbitmq_vhost:
-    name: "{{ rabbitmq.vhost }}"
+    name: "{{ item }}"
     state: present
+  with_items: "{{ rabbitmq.vhosts }}"
   tags:
     - setup
 
@@ -25,7 +26,7 @@
   rabbitmq_user:
     user: "{{ item.user }}"
     password: "{{ item.password }}"
-    vhost: "{{ rabbitmq.vhost }}"
+    vhost: "{{ item.vhost }}"
     configure_priv: "{{ item.configure_priv }}"
     read_priv: "{{ item.read_priv }}"
     write_priv: "{{ item.write_priv }}"

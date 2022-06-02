@@ -1,5 +1,6 @@
 ---
-- name: Install system packages
+- name: memcached | Install system packages
+  when: memcached is defined
   become: yes
   apt: >
     pkg=memcached
@@ -8,7 +9,8 @@
   tags:
     - setup
 
-- name: Enable on boot
+- name: memcached | Enable on boot
+  when: memcached is defined
   become: yes
   systemd: >
     name=memcached
@@ -17,7 +19,8 @@
   tags:
     - setup
 
-- name: Install custom memcached config
+- name: memcached | Install custom memcached config
+  when: memcached is defined
   become: yes
   template: >
     src=memcached.conf.j2

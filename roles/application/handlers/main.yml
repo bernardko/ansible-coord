@@ -21,7 +21,7 @@
 
 - name: Run custom django startup management commands 
   when:
-    - framework == 'django'
+    - django is defined
     - django_commands.start_commands is defined
   become_user: "{{ project_user }}"
   django_manage: >

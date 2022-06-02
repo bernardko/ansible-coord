@@ -1,12 +1,29 @@
 ---
 # Main deployment workflow
+- name: Build new environment dictionary
+  set_fact:
+    dotenv_with_superuser: "{{ dot_env | combine({'DJANGO_SUPERUSER_PASSWORD': '{{ django.superuser.password }}'}, recursive=true) }}"
+
+- name: Run createsuperuser command
+  when: django.superuser is defined
+  become_user: "{{ project_user }}"
+  django_manage:
+    command: "createsuperuser --noinput --username={{ django.superuser.username }} --email={{ django.superuser.email }}"
+    app_path: "{{ app_working_dir }}"
+    settings: "{{ django.settings }}"
+    virtualenv: "{{ virtualenv }}"
+  environment: "{{ dotenv_with_superuser }}"
+  ignore_errors: yes
+  tags:
+    - setup
+
 - name: Run database migrations
   when: django_commands.migrate|d(False) == True
   become_user:  "{{ project_user }}"
   django_manage: >
     command=migrate
     app_path={{ app_working_dir }}
-    settings={{ django_settings }}
+    settings={{ django.settings }}
     virtualenv={{ virtualenv }}
   environment: "{{ dot_env }}"
   tags:
@@ -19,7 +36,7 @@
     command=loaddata
     fixtures={{ item }}
     app_path={{ app_working_dir }}
-    settings={{ django_settings }}
+    settings={{ django.settings }}
     virtualenv={{ virtualenv }}
   with_items: "{{ django_commands.fixtures }}"
   environment: "{{ dot_env }}"
@@ -32,7 +49,7 @@
   django_manage: >
     command=collectstatic
     app_path={{ app_working_dir }}
-    settings={{ django_settings }}
+    settings={{ django.settings }}
     virtualenv={{ virtualenv }}
   environment: "{{ dot_env }}"
   tags:
