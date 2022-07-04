@@ -1,0 +1,60 @@
+---
+- name: Backup Database and Files
+  hosts: '{{backupservers_target|default("backupservers")}}'
+  tasks:
+    - name: "Backup | Set Timestamp"
+      set_fact:
+        now: '{{ lookup("pipe", "date +%Y%m%d") }}'
+
+    - name: "Backup | Create a Backup Directory"
+      when: backup_remote is defined
+      file:
+        path: "{{ backup_remote }}"
+        mode: 0777
+        owner: "{{ project_user }}"
+        state: directory
+
+    - name: "Backup | Backup the Database"
+      when:
+        - backup_remote is defined
+        - postgresql is defined
+      become: yes
+      become_user: postgres
+      postgresql_db:
+        state: dump
+        name: "{{ item.user }}"
+        port: "{{ item.port }}"
+        target: "{{ backup_remote }}/{{ now }}_{{ item.name }}.sql.gz"
+      with_items: "{{ postgresql }}"
+
+    - name: "Backup | Backup the Files Paths"
+      when:
+        - backup_remote is defined
+        - backup_paths is defined
+      archive:
+        path: "{{ item.path }}"
+        dest: "{{ backup_remote }}/{{ now }}_{{ item.name }}.gz"
+        format: gz
+      with_items: "{{ backup_paths }}"
+
+    - name: "Backup | Fetch PostgreSQL Backup"
+      when:
+        - backup_remote is defined
+        - backup_local is defined
+        - postgresql is defined
+      fetch:
+        src: "{{ backup_remote }}/{{ now }}_{{ item.name }}.sql.gz"
+        dest: "{{ backup_local }}/{{ now }}_{{ item.name }}.sql.gz"
+        flat: yes
+      with_items: "{{ postgresql }}"
+
+    - name: "Backup | Fetch Backup Files"
+      when:
+        - backup_remote is defined
+        - backup_local is defined
+        - backup_paths is defined
+      fetch:
+        src: "{{ backup_remote }}/{{ now }}_{{ item.name }}.gz"
+        dest: "{{ backup_local }}/{{ now }}_{{ item.name }}.gz"
+        flat: yes
+      with_items: "{{ backup_paths }}"

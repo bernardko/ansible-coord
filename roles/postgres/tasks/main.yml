@@ -15,10 +15,11 @@
   become: yes
   become_user: postgres
   postgresql_user: >
-    user={{ postgresql.user }}
-    password={{ postgresql.password }}
-    port={{ postgresql.port }}
+    user={{ item.user }}
+    password={{ item.password }}
+    port={{ item.port }}
     role_attr_flags=CREATEDB,NOSUPERUSER
+  with_items: "{{ postgresql }}"
   tags: 
     - deploy
 
@@ -27,11 +28,12 @@
   become: yes
   become_user: postgres
   postgresql_db: >
-    name={{ postgresql.name }}
-    owner={{ postgresql.user }}
-    login_host={{ postgresql.host }}
-    login_user={{ postgresql.user }}
-    login_password={{ postgresql.password }}
-    port={{ postgresql.port }}
+    name={{ item.name }}
+    owner={{ item.user }}
+    login_host={{ item.host }}
+    login_user={{ item.user }}
+    login_password={{ item.password }}
+    port={{ item.port }}
+  with_items: "{{ postgresql }}"
   tags:
     - deploy
