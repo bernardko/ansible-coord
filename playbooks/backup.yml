@@ -22,12 +22,12 @@
       become_user: postgres
       postgresql_db:
         state: dump
-        name: "{{ item.user }}"
+        name: "{{ item.name }}"
         port: "{{ item.port }}"
         target: "{{ backup_remote }}/{{ now }}_{{ item.name }}.sql.gz"
       with_items: "{{ postgresql }}"
 
-    - name: "Backup | Backup the Files Paths"
+    - name: "Backup | Backup the File Paths"
       when:
         - backup_remote is defined
         - backup_paths is defined
@@ -57,4 +57,24 @@
         src: "{{ backup_remote }}/{{ now }}_{{ item.name }}.gz"
         dest: "{{ backup_local }}/{{ now }}_{{ item.name }}.gz"
         flat: yes
+      with_items: "{{ backup_paths }}"
+
+    - name: Backup | Remove remote database backups
+      when: 
+        - backup_remote is defined
+        - postgresql is defined
+      become: yes
+      file: >
+        path={{ backup_remote }}/{{ now }}_{{ item.name }}.sql.gz
+        state=absent
+      with_items: "{{ postgresql }}"
+
+    - name: Backup | Remove remote path backups
+      when: 
+        - backup_remote is defined
+        - backup_paths is defined
+      become: yes
+      file: >
+        path={{ backup_remote }}/{{ now }}_{{ item.name }}.gz
+        state=absent
       with_items: "{{ backup_paths }}"
