@@ -1,6 +1,6 @@
 namespace: bernardko
 name: coord
-version: 0.3.1
+version: 0.3.2
 readme: README.md
 authors:
   - Bernard Ko <bernardko@gmail.com>
