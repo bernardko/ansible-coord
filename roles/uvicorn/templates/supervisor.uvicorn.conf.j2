@@ -1,7 +1,7 @@
 [fcgi-program:{{ project_name }}-{{ item.name }}-uvicorn]
 directory={{ app_working_dir }}
 socket=tcp://{{ item.host }}:{{ item.port }}
-command={{ package_manager_command }} {{ virtualenv }}/bin/uvicorn --fd 0 {{ item.asgi }} {{ uvicorn_env_switch }}
+command={{ package_manager_command }} {{ virtualenv }}/bin/uvicorn --fd 0 --limit-max-requests {{ item.max_requests|d(10000) }} {{ item.asgi }} {{ uvicorn_env_switch }}
 numprocs={{ item.processes }}
 process_name=%(process_num)d
 user={{ project_user }}

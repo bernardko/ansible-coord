@@ -35,5 +35,17 @@
     login_password={{ item.password }}
     port={{ item.port }}
   with_items: "{{ postgresql }}"
+  register: database_exists
   tags:
     - deploy
+
+# - name: Import Database Backup
+#   when:
+#     - item.stdout.changed
+#     - item.item.restore
+#   postgresql_db: 
+#     name: {{ item.item.name }}
+#     state: restore
+#     target: {{ item.item.restore }}
+#   with_items: "{{ database_exists.results }}"
+  

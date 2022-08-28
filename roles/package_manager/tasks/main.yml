@@ -1,0 +1,21 @@
+---
+- name: Application | Sync python package requirements using pipenv
+  when: package_manager == 'pipenv'
+  include_role:
+    name: pipenv
+  tags:
+    - deploy
+
+- name: Application | Sync python package requirements using poetry
+  when: package_manager == 'poetry'
+  include_role:
+    name: poetry
+  tags:
+    - deploy
+
+- name: Application | Install python package requirements using pip
+  when: package_manager == 'pip'
+  include_role:
+    name: pip
+  tags:
+    - deploy
