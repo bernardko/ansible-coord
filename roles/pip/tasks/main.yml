@@ -1,9 +1,15 @@
 ---
 - name: Pip | Install requirements
+  when: pip_requirements_file is defined
   command: '{{ virtualenv }}/bin/pip install -r {{ pip_requirements_file }}'
   environment:
     VIRTUAL_ENV: '{{ virtualenv }}'
 
+- name: Pip | Install ansible requirements
+  when: ansible_requirements_file is defined
+  command: '{{ virtualenv }}/bin/ansible-galaxy install -r {{ ansible_requirements_file }}'
+  environment:
+    VIRTUAL_ENV: '{{ virtualenv }}'
 
 - name: Pip | Set Package Manager Command Fact
   set_fact:
