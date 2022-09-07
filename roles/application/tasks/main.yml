@@ -48,6 +48,32 @@
   tags:
     - deploy
 
+- name: Application | Upload template files
+  when:
+    - template_files is defined
+  become: yes
+  become_user: "{{ project_user }}"
+  template:
+    src: "{{ item.template }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ item.owner | default(omit) }}"
+    group: "{{ item.group | default(omit) }}"
+    mode: "{{ item.mode | default(omit) }}"
+    backup: "{{ item.backup | default(omit) }}"
+    force: "{{ item.force | default(True) }}"
+    validate: "{{ item.validate | default(omit) }}"
+    selevel: "{{ item.selevel | default(omit) }}"
+    serole: "{{ item.serole | default(omit) }}"
+    setype: "{{ item.setype | default(omit) }}"
+    seuser: "{{ item.seuser | default(omit) }}"
+  with_items: "{{ template_files }}"
+  notify:
+    - restart celery workers
+    - restart uvicorn
+    - restart app
+  tags:
+    - deploy
+
 - name: Application | Set Package Manager
   include_role:
     name: package_manager
