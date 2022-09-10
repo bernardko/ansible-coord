@@ -1,4 +1,15 @@
 ---
+- name: Application | Trigger Application Restart
+  debug: msg="Trigger Application Restart"
+  changed_when: true
+  notify:
+    - restart celery workers
+    - restart uvicorn
+    - restart app
+  tags:
+    - never
+    - restart
+
 - name: Application | Clone or pull git repository
   become: yes
   become_user: "{{ project_user }}"

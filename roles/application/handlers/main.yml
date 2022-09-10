@@ -27,7 +27,7 @@
   django_manage: >
     command={{ item }}
     app_path={{ app_working_dir }}
-    settings={{ django_settings }}
+    settings={{ django.settings }}
     virtualenv={{ virtualenv }}
   with_items: "{{ django_commands.start_commands }}"
   environment: "{{ dot_env }}"
