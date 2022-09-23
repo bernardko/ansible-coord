@@ -5,6 +5,7 @@
     name: pipenv
   tags:
     - deploy
+    - virtualenv
 
 - name: Application | Sync python package requirements using poetry
   when: package_manager == 'poetry'
@@ -12,6 +13,7 @@
     name: poetry
   tags:
     - deploy
+    - virtualenv
 
 - name: Application | Install python package requirements using pip
   when: package_manager == 'pip'
@@ -19,3 +21,4 @@
     name: pip
   tags:
     - deploy
+    - virtualenv

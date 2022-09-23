@@ -17,6 +17,8 @@
 - import_playbook: app.yml
   vars:
     is_setup: True
+  tags:
+    - virtualenv
 - import_playbook: loadbalancers.yml
   vars:
     is_setup: True

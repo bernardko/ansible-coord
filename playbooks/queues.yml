@@ -1,6 +1,7 @@
 ---
 - name: Configure all queue servers
   hosts: '{{queueservers_target|default("queueservers")}}'
+  ignore_unreachable: "{{ ignore_unreachable|d(False) }}"
   roles:
     - role: rabbitmq
       tags:

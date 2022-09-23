@@ -1,6 +1,7 @@
 ---
 - name: Configure all database servers
   hosts: '{{dbservers_target|default("dbservers")}}'
+  ignore_unreachable: "{{ ignore_unreachable|d(False) }}"
   roles:
     - role: postgres
       tags:

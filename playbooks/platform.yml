@@ -1,6 +1,7 @@
 ---
 - name: Install platform dependancies
   hosts: '{{appservers_target|default("appservers")}}'
+  ignore_unreachable: "{{ ignore_unreachable|d(False) }}"
   roles:
     - role: pyenv
       tags:

@@ -18,7 +18,7 @@
     dest={{ project_src }}
     version={{ repo.version }}
     accept_newhostkey=yes
-    force=yes
+    force={{ repo.force|d(True) }}
     update=yes
   notify:
     - restart celery workers
@@ -90,6 +90,7 @@
     name: package_manager
   tags:
     - deploy
+    - virtualenv
 
 - name: Application | Setup Django Application
   include_role:

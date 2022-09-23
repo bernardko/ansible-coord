@@ -1,6 +1,7 @@
 ---
 - name: Configure all cache servers
   hosts: '{{cacheservers_target|default("cacheservers")}}'
+  ignore_unreachable: "{{ ignore_unreachable|d(False) }}"
   roles:
     - role: memcached
       tags:

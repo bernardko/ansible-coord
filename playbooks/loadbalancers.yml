@@ -1,6 +1,7 @@
 ---
 - name: Configure all Load Balancers
   hosts: '{{loadbalancers_target|default("loadbalancers")}}'
+  ignore_unreachable: "{{ ignore_unreachable|d(False) }}"
   roles:
     - role: nginx
       tags:
