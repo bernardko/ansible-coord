@@ -39,7 +39,7 @@
 
 - name: Poetry | Install poetry-dotenv-plugin
   when: not poetry_installed.stat.exists
-  shell: '. {{ virtualenv }}/bin/activate && {{ ansible_env.HOME }}/.local/bin/poetry plugin add poetry-dotenv-plugin'
+  shell: '. {{ virtualenv }}/bin/activate && {{ ansible_env.HOME }}/.local/bin/poetry self add poetry-dotenv-plugin'
   tags:
     - setup
 
