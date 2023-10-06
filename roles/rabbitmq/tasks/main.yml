@@ -30,7 +30,20 @@
     configure_priv: "{{ item.configure_priv }}"
     read_priv: "{{ item.read_priv }}"
     write_priv: "{{ item.write_priv }}"
+    tags: "{{ item.tags|d('') }}"
     state: present
   with_items: "{{ rabbitmq.users }}"
+  tags:
+    - setup
+
+- name: Sets the rabbitmq plugins
+  when: 
+    - rabbitmq is defined
+    - rabbitmq.plugins is defined
+    - item.remove|d(False) == False
+  become: yes
+  community.rabbitmq.rabbitmq_plugin:
+    names: "{{ rabbitmq.plugins.names }}"
+    state: "{{ rabbitmq.plugins.state }}"
   tags:
     - setup
