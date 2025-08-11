@@ -42,6 +42,17 @@
   tags:
     - deploy
 
+- name: Project | Create a symbolic link
+  when: create_symlinks is defined
+  ansible.builtin.file:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    state: link
+    owner: "{{ project_user }}"
+    group: "{{ project_group }}"
+  with_items: "{{ create_symlinks }}"
+  tags:
+    - deploy
 
 - name: Project | Change permissions
   become: true

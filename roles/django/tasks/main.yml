@@ -28,7 +28,8 @@
   with_items: "{{ django_commands.fixtures }}"
   environment: "{{ dot_env }}"
   tags:
-    - deploy
+    - never
+    - fixtures
 
 - name: Django | Run collect static command
   when: django_commands.collectstatic|d(False) == True
@@ -43,10 +44,13 @@
     - deploy
 
 - name: Django | Run createsuperuser command
-  when: django.superuser is defined
+  when: 
+    - django.superuser is defined
+    - is_setup is defined
+    - is_setup == True
   become_user: "{{ project_user }}"
   django_manage:
-    command: "createsuperuser --noinput --username={{ django.superuser.username }} --email={{ django.superuser.email }}"
+    command: "createsuperuser --noinput {% if django.superuser.username is defined %}--username={{ django.superuser.username }}{% endif %} --email={{ django.superuser.email }}"
     app_path: "{{ app_working_dir }}"
     settings: "{{ django.settings }}"
     virtualenv: "{{ virtualenv }}"
