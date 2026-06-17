@@ -1,0 +1,58 @@
+---
+- name: uv | Set uv_binary fact
+  set_fact:
+    uv_binary: "{{ uv_install_path }}"
+
+- name: uv | Check if uv is already installed
+  stat:
+    path: "{{ uv_binary }}"
+  register: uv_installed_stat
+  changed_when: false
+
+- name: uv | Install uv via astral.sh official script
+  when: not uv_installed_stat.stat.exists
+  become: yes
+  shell: |
+    curl -LsSf https://astral.sh/uv/install.sh | env UV_UNMANAGED_INSTALL={{ bin_path }} sh
+  args:
+    creates: "{{ uv_binary }}"
+
+- name: uv | Resolve requested Python version
+  when: python_version | default('') != ''
+  command: "{{ uv_binary }} python find {{ python_version }}"
+  register: uv_python_resolve
+  changed_when: false
+  failed_when: false
+
+- name: uv | Set fact python_interpreter (from python_version)
+  when: python_version | default('') != '' and uv_python_resolve.rc == 0
+  set_fact:
+    python_interpreter: "{{ uv_python_resolve.stdout | trim }}"
+
+- name: uv | Set fact python_interpreter (fallback)
+  when: python_version | default('') == '' or uv_python_resolve.rc != 0
+  set_fact:
+    python_interpreter: "{{ virtualenv }}/bin/python3"
+
+- name: uv | Set Package Manager Command Fact
+  set_fact:
+    package_manager_command: "{{ uv_binary }} run"
+
+- name: uv | Ensure project-local virtualenv exists
+  command: "{{ uv_binary }} venv --python {{ python_interpreter }} {{ virtualenv }}"
+  args:
+    chdir: "{{ project_src }}"
+    creates: "{{ virtualenv }}/bin/python"
+
+- name: uv | Run uv sync (install locked dependencies)
+  environment:
+    VIRTUAL_ENV: "{{ virtualenv }}"
+    LANG: "{{ lang }}"
+    PATH: "{{ virtualenv }}/bin:{{ ansible_env.PATH }}"
+  command: "{{ uv_binary }} sync {{ uv_extra_args | default('') }}"
+  args:
+    chdir: "{{ project_src }}"
+
+- name: Set fact python_used (debug helper)
+  set_fact:
+    python_used: "{{ python_interpreter }}"

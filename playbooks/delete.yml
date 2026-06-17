@@ -38,4 +38,8 @@
         name: pyenv
         tasks_from: cleanup
       tags:
-        - pyenv
+        - pyenv    - import_role: 
+        name: uv
+        tasks_from: cleanup
+      tags:
+        - uv

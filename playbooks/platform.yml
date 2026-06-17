@@ -4,6 +4,7 @@
   ignore_unreachable: "{{ ignore_unreachable|d(False) }}"
   roles:
     - role: pyenv
+      when: (package_manager | default('')) != 'uv'
       tags:
         - pyenv
     - role: supervisor

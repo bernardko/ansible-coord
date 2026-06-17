@@ -22,3 +22,11 @@
   tags:
     - deploy
     - virtualenv
+
+- name: Application | Install python package requirements using pip
+  when: package_manager == 'uv'
+  include_role:
+    name: uv
+  tags:
+    - deploy
+    - virtualenv

@@ -1,0 +1,14 @@
+---
+- name: uv | Remove uv-managed virtualenv
+  become: yes
+  file:
+    path: "{{ virtualenv }}"
+    state: absent
+  when: virtualenv | default('') != '' and coord_delete_all | default(false)
+
+- name: uv | Remove uv binary from ~/.local/bin
+  become: yes
+  file:
+    path: "{{ uv_install_path }}"
+    state: absent
+  when: coord_delete_all | default(false)

@@ -1,11 +1,11 @@
-# Ansible Collection for deploying Django projects
+# Ansible Collection for deploying Django and FastAPI projects
 
-A collection of roles and playbooks used for deploying Django projects.
+A collection of roles and playbooks used for deploying Django and FastAPI projects.
 
 ## Features
 
-- Configure and deploy Django projects using pipenv, supervisor and uvicorn.
-- Use any python version with pyenv.
+- Configure and deploy Django or FastAPI projects using pipenv, poetry, uv, supervisor and uvicorn.
+- Use any python version with pyenv, or let uv manage Python versions.
 - Easy configuration of Celery workers.
 - PostgreSQL, user and database configuration.
 - RabbitMQ vhost and user configuration.
