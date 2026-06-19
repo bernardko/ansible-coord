@@ -32,6 +32,7 @@
     name: python-dotenv
     virtualenv: '{{ virtualenv }}'
     state: present
+  when: package_manager | default('pipenv') != 'uv'
   tags:
     - deploy
 
@@ -148,3 +149,24 @@
   when: celery is defined
   tags:
     - deploy
+
+- name: Application | Wait for uvicorn health endpoint
+  when:
+    - uvicorn is defined
+    - item.health_check | default(false) | bool
+    - item.remove | default(false) == False
+  ansible.builtin.uri:
+    url: "http://{{ item.host }}:{{ item.port }}{{ item.health_check_path | default(uvicorn_health_check_path) }}"
+    status_code: "{{ item.health_check_expected_status | default(uvicorn_health_check_expected_status) }}"
+    validate_certs: "{{ item.health_check_validate_certs | default(uvicorn_health_check_validate_certs) }}"
+    timeout: "{{ item.health_check_timeout | default(uvicorn_health_check_timeout) }}"
+  register: uvicorn_health_result
+  retries: "{{ item.health_check_retries | default(uvicorn_health_check_retries) }}"
+  delay: "{{ item.health_check_delay | default(uvicorn_health_check_delay) }}"
+  until: uvicorn_health_result is succeeded
+  with_items: "{{ uvicorn }}"
+  loop_control:
+    label: "{{ item.name }}"
+  tags:
+    - deploy
+    - setup

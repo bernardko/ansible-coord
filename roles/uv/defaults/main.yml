@@ -5,3 +5,5 @@ uv_install_path: "{{ bin_path }}/uv"
 lang: "en_US.UTF-8"
 uv_extra_args: ""
 python_version: ""
+uv_allow_python_fallback: false
+uv_archive_legacy_venv: true

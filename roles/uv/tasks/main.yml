@@ -17,26 +17,135 @@
   args:
     creates: "{{ uv_binary }}"
 
+- name: uv | Ensure requested Python is installed
+  when: python_version | default('') != ''
+  become: yes
+  command: "{{ uv_binary }} python install {{ python_version }}"
+  register: uv_python_install
+  changed_when: "'Installed' in uv_python_install.stdout or 'Installed' in uv_python_install.stderr"
+
 - name: uv | Resolve requested Python version
   when: python_version | default('') != ''
   command: "{{ uv_binary }} python find {{ python_version }}"
   register: uv_python_resolve
   changed_when: false
-  failed_when: false
+
+- name: uv | Fail when requested Python cannot be resolved
+  when:
+    - python_version | default('') != ''
+    - uv_python_resolve.rc != 0
+    - not (uv_allow_python_fallback | default(false))
+  fail:
+    msg: >-
+      uv could not find Python {{ python_version }} on this host.
+      uv python install stderr: {{ uv_python_install.stderr | default('') }}
+      uv python find stderr: {{ uv_python_resolve.stderr | default('') }}
+      Set uv_allow_python_fallback: true to opt in to a system-Python fallback.
 
 - name: uv | Set fact python_interpreter (from python_version)
   when: python_version | default('') != '' and uv_python_resolve.rc == 0
   set_fact:
     python_interpreter: "{{ uv_python_resolve.stdout | trim }}"
 
-- name: uv | Set fact python_interpreter (fallback)
-  when: python_version | default('') == '' or uv_python_resolve.rc != 0
+- name: uv | Set fact python_interpreter (system fallback)
+  when:
+    - python_version | default('') == '' or uv_python_resolve.rc != 0
+    - uv_allow_python_fallback | default(false)
+  set_fact:
+    python_interpreter: "{{ ansible_python_interpreter | default('/usr/bin/python3') }}"
+
+- name: "uv | Set fact python_interpreter (last-resort, existing venv python3)"
+  when:
+    - python_version | default('') == '' or uv_python_resolve.rc != 0
+    - not (uv_allow_python_fallback | default(false))
   set_fact:
     python_interpreter: "{{ virtualenv }}/bin/python3"
 
 - name: uv | Set Package Manager Command Fact
   set_fact:
     package_manager_command: "{{ uv_binary }} run"
+
+- name: uv | Inspect existing venv metadata
+  when: virtualenv | default('') != ''
+  become: yes
+  stat:
+    path: "{{ virtualenv }}/pyvenv.cfg"
+  register: uv_venv_cfg_stat
+
+- name: uv | Read existing venv pyvenv.cfg
+  when:
+    - virtualenv | default('') != ''
+    - uv_venv_cfg_stat.stat.exists | default(false)
+  become: yes
+  slurp:
+    src: "{{ virtualenv }}/pyvenv.cfg"
+  register: uv_venv_cfg_raw
+
+- name: uv | Parse existing venv marker and version
+  when:
+    - virtualenv | default('') != ''
+    - uv_venv_cfg_stat.stat.exists | default(false)
+  set_fact:
+    uv_existing_venv_cfg: "{{ uv_venv_cfg_raw.content | b64decode }}"
+    uv_existing_venv_uv_marker: "{{ ('uv =' in (uv_venv_cfg_raw.content | b64decode)) }}"
+    uv_existing_venv_version_info: >-
+      {{
+        ((uv_venv_cfg_raw.content | b64decode)
+         | regex_search('version_info\\s*=\\s*[0-9.]+')
+         | default('', true)
+         | regex_replace('^.*version_info\\s*=\\s*', ''))
+      }}
+
+- name: uv | Compute expected venv version prefix
+  when: python_version | default('') != ''
+  set_fact:
+    uv_expected_version_prefix: "{{ python_version.split('.')[:2] | join('.') }}"
+
+- name: uv | Compute version match pattern
+  when:
+    - virtualenv | default('') != ''
+    - uv_expected_version_prefix | default('') != ''
+  set_fact:
+    uv_version_match_pattern: "^\\s*{{ uv_expected_version_prefix }}\\."
+
+- name: uv | Compute version mismatch flag
+  when: virtualenv | default('') != ''
+  set_fact:
+    uv_version_mismatch: >-
+      {{
+        (uv_expected_version_prefix | default('') != '')
+        and (
+          (uv_existing_venv_version_info | default('')) == ''
+          or not ((uv_existing_venv_version_info | default('')) is search(uv_version_match_pattern | default('$^')))
+        )
+      }}
+
+- name: uv | Determine whether existing venv must be archived
+  when: virtualenv | default('') != ''
+  set_fact:
+    uv_archive_existing_venv: >-
+      {{
+        (uv_archive_legacy_venv | default(true))
+        and (
+          (not (uv_venv_cfg_stat.stat.exists | default(false)))
+          or (not (uv_existing_venv_uv_marker | default(false)))
+          or (uv_version_mismatch | default(false))
+        )
+      }}
+
+- name: uv | Archive legacy venv
+  when:
+    - virtualenv | default('') != ''
+    - uv_archive_existing_venv | default(false)
+  become: yes
+  shell: |
+    LEGACY="{{ virtualenv }}.legacy-{{ ansible_date_time.date }}"
+    if [ -d "$LEGACY" ]; then
+      rm -rf "$LEGACY"
+    fi
+    mv "{{ virtualenv }}" "$LEGACY"
+  args:
+    removes: "{{ virtualenv }}/pyvenv.cfg"
 
 - name: uv | Ensure project-local virtualenv exists
   command: "{{ uv_binary }} venv --python {{ python_interpreter }} {{ virtualenv }}"
@@ -49,9 +158,19 @@
     VIRTUAL_ENV: "{{ virtualenv }}"
     LANG: "{{ lang }}"
     PATH: "{{ virtualenv }}/bin:{{ ansible_env.PATH }}"
-  command: "{{ uv_binary }} sync {{ uv_extra_args | default('') }}"
+  command: "{{ uv_binary }} sync --active {{ uv_extra_args | default('') }}"
   args:
     chdir: "{{ project_src }}"
+  register: uv_sync_result
+  changed_when: uv_sync_result.rc == 0
+
+- name: uv | Surface uv sync failure
+  when: uv_sync_result.rc != 0
+  fail:
+    msg: >-
+      uv sync failed (rc={{ uv_sync_result.rc }}).
+      stdout: {{ uv_sync_result.stdout | default('') }}
+      stderr: {{ uv_sync_result.stderr | default('') }}
 
 - name: Set fact python_used (debug helper)
   set_fact:

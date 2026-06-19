@@ -1,1 +1,8 @@
 package_manager: 'pipenv'
+
+uvicorn_health_check_path: "/health"
+uvicorn_health_check_expected_status: 200
+uvicorn_health_check_timeout: 10
+uvicorn_health_check_retries: 10
+uvicorn_health_check_delay: 3
+uvicorn_health_check_validate_certs: false
