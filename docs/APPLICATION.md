@@ -21,7 +21,7 @@ The role runs tasks in this approximate order:
 
 The final task (`Application | Wait for uvicorn health endpoint`) polls the HTTP health endpoint of each uvicorn instance after all setup and deploy tasks have run. It is designed to catch silent failures where the service starts but is unable to handle requests (e.g. broken virtualenv, missing dependency, import error at runtime).
 
-A handler (`verify uvicorn health`) also listens for the `restart uvicorn` handler and runs the same check immediately after a uvicorn restart, as an extra verification layer.
+The `verify uvicorn health` handler is explicitly notified alongside `restart uvicorn` by tasks that may restart uvicorn. This ensures health verification runs immediately after a uvicorn restart when `health_check: true` is set on the instance.
 
 ### Opt-in Interface
 

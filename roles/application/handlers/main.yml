@@ -26,7 +26,6 @@
   with_items: "{{ uvicorn }}"
   loop_control:
     label: "{{ item.name }}"
-  listen: "restart uvicorn"
 
 - name: restart celery workers
   when: 

@@ -5,6 +5,7 @@
   notify:
     - restart celery workers
     - restart uvicorn
+    - verify uvicorn health
     - restart app
   tags:
     - never
@@ -23,6 +24,7 @@
   notify:
     - restart celery workers
     - restart uvicorn
+    - verify uvicorn health
     - restart app
   tags:
     - deploy
@@ -58,6 +60,7 @@
   notify:
     - restart celery workers
     - restart uvicorn
+    - verify uvicorn health
     - restart app
   tags:
     - deploy
@@ -84,6 +87,7 @@
   notify:
     - restart celery workers
     - restart uvicorn
+    - verify uvicorn health
     - restart app
   tags:
     - deploy
